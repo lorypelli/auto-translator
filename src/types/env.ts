@@ -1,6 +1,4 @@
 import type { APIInteraction } from 'discord-api-types/v10';
-import type { Ai } from './ai.js';
-import type { Kv } from './kv.js';
 
 export type Bindings = {
     PUBLIC_KEY: string;
@@ -8,7 +6,7 @@ export type Bindings = {
     BOT_TOKEN: string;
     API_KEY: string;
     AI: Ai;
-    LANGUAGES: Kv;
+    LANGUAGES: KVNamespace;
 };
 
 export type RawBindings = {
@@ -23,7 +21,7 @@ export type RawBindings = {
     DEV_BOT_TOKEN: string;
     DEV_API_KEY: string;
     AI: Ai;
-    LANGUAGES: Kv;
+    LANGUAGES: KVNamespace;
 };
 
 export type AppEnv = {

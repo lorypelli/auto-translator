@@ -6,6 +6,7 @@ import {
     FIRST_CONVERSATION_PROMPT,
     LATEST_CONVERSATION_PROMPT,
 } from './prompts.js';
+import { boundarySchema } from './schemas.js';
 
 type Boundary = 'start' | 'end';
 
@@ -15,19 +16,14 @@ async function findBoundary(
     key: Boundary,
     messages: APIMessage[],
 ) {
-    const reply = await ask<Boundary>(env, prompt, {
+    const reply = await ask(env, prompt, boundarySchema(key), {
         messages: messages.map(({ content }, id) => ({
             id,
             content,
         })),
     });
     const index = reply[key];
-    if (
-        typeof index != 'number' ||
-        !Number.isInteger(index) ||
-        index < 0 ||
-        index >= messages.length
-    ) {
+    if (index === undefined || index < 0 || index >= messages.length) {
         throw new Error(INVALID_RESPONSE_ERROR);
     }
     return index;

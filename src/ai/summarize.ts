@@ -5,6 +5,7 @@ import { toText } from '../utils/index.js';
 import { ask } from './client.js';
 import { INVALID_RESPONSE_ERROR } from './errors.js';
 import { summaryPrompt } from './prompts.js';
+import { SUMMARY_SCHEMA } from './schemas.js';
 
 const MENTION_REGEX = /<@!?(\d+)>/g;
 
@@ -20,12 +21,17 @@ export async function summarizeMessages(
     messages: APIMessage[],
     language: string,
 ) {
-    const { summary } = await ask<'summary'>(env, summaryPrompt(language), {
-        messages: messages.map((message) => ({
-            author: getDisplayName(message.author),
-            content: resolveMentions(message),
-        })),
-    });
+    const { summary } = await ask(
+        env,
+        summaryPrompt(language),
+        SUMMARY_SCHEMA,
+        {
+            messages: messages.map((message) => ({
+                author: getDisplayName(message.author),
+                content: resolveMentions(message),
+            })),
+        },
+    );
     const text = toText(summary);
     if (!text) {
         throw new Error(INVALID_RESPONSE_ERROR);

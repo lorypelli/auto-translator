@@ -1,5 +1,4 @@
 import type { Bindings } from '../types/index.js';
-import { isStringArray } from '../utils/index.js';
 import { ask } from './client.js';
 import {
     INVALID_LANGUAGE_ERROR,
@@ -7,6 +6,7 @@ import {
     isInvalidResponse,
 } from './errors.js';
 import { TRANSLATE_PROMPT } from './prompts.js';
+import { TRANSLATE_SCHEMA } from './schemas.js';
 
 const CHUNK_SIZE = 10;
 
@@ -15,14 +15,16 @@ async function requestTranslations(
     messages: string[],
     language: string,
 ) {
-    const { translations } = await ask<'translations'>(env, TRANSLATE_PROMPT, {
-        language,
-        messages,
-    });
-    if (
-        !isStringArray(translations) ||
-        translations.length != messages.length
-    ) {
+    const { translations } = await ask(
+        env,
+        TRANSLATE_PROMPT,
+        TRANSLATE_SCHEMA,
+        {
+            language,
+            messages,
+        },
+    );
+    if (translations.length != messages.length) {
         throw new Error(INVALID_RESPONSE_ERROR);
     }
     return translations;
