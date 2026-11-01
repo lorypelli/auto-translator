@@ -6,6 +6,13 @@ const MAX_EMBEDS = 10;
 const MAX_EMBEDS_LENGTH = 6000;
 const EMBED_COLOR = 0x6845d8;
 
+function truncate(text: string, max: number) {
+    if (text.length <= max) {
+        return text;
+    }
+    return `${text.slice(0, max - 1)}…`;
+}
+
 export function toEmbed(
     description: string,
     user: APIUser | null,
@@ -19,7 +26,7 @@ export function toEmbed(
                   icon_url: getAvatarUrl(user),
               }
             : undefined,
-        description: description.slice(0, MAX_DESCRIPTION_LENGTH) || undefined,
+        description: truncate(description, MAX_DESCRIPTION_LENGTH) || undefined,
         timestamp,
     };
 }

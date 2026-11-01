@@ -75,18 +75,24 @@ async function translateToEmbeds(
     language: string,
     options: TranslateChatOptions,
 ) {
+    const name = await getLanguageName(env, language);
     const selected = await selectMessages(env, messages, options);
-    const [translations] = await Promise.all([
-        translateMessages(
-            env,
-            selected.map(({ content }) => content),
-            language,
-        ),
-        getLanguageName(env, language),
-    ]);
+    const translations = await translateMessages(
+        env,
+        selected.map(({ content }) => content),
+        name,
+    );
     return selected.map(({ author, timestamp }, i) =>
         toEmbed(translations.at(i) || '', author, timestamp),
     );
+}
+
+function getContent(userId: string, customMessage: string, truncated: boolean) {
+    const content = `<@${userId}> ${customMessage}`;
+    if (truncated) {
+        return `${content}\n-# Only the first ${MAX_MESSAGES} messages of the range were translated.`;
+    }
+    return content;
 }
 
 async function sendTranslations(
@@ -97,7 +103,7 @@ async function sendTranslations(
 ) {
     const { userId, customMessage, count, from, to } = options;
     const limit = count == CONTEXT_MESSAGES ? MAX_MESSAGES : count;
-    const messages = await getChatMessages(
+    const { messages, truncated } = await getChatMessages(
         env,
         channelId,
         {
@@ -120,7 +126,10 @@ async function sendTranslations(
     );
     const bodies = chunkEmbeds(embeds).map(
         (chunk, i): RESTPostAPIInteractionFollowupJSONBody => ({
-            content: i == 0 ? `<@${userId}> ${customMessage}` : undefined,
+            content:
+                i == 0
+                    ? getContent(userId, customMessage, truncated)
+                    : undefined,
             embeds: chunk,
             allowed_mentions: {
                 users: [userId],
@@ -144,7 +153,7 @@ export function translate(
             `Messages must be ${CONTEXT_MESSAGES}, or an integer between ${MIN_MESSAGES} and ${MAX_MESSAGES}.`,
         );
     }
-    const range = parseMessageRange(options.from, options.to);
+    const range = parseMessageRange(options.from, options.to, channelId);
     if (!range) {
         return error(INVALID_RANGE_ERROR);
     }

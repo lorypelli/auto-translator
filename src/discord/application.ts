@@ -42,8 +42,8 @@ export async function getApplication(env: Bindings) {
 }
 
 export async function getOwnerId(env: Bindings) {
-    const { team } = await getApplication(env);
-    return team?.owner_user_id || null;
+    const { owner, team } = await getApplication(env);
+    return team?.owner_user_id || owner?.id || null;
 }
 
 export function getInviteUrl({ APPLICATION_ID }: Bindings) {

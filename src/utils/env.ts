@@ -12,6 +12,7 @@ export function getBindings<E extends AppEnv>({
         return {
             AI,
             LANGUAGES,
+            API_KEY: raw.PROD_API_KEY,
             APPLICATION_ID: raw.PROD_APPLICATION_ID,
             PUBLIC_KEY: raw.PROD_PUBLIC_KEY,
             BOT_TOKEN: raw.PROD_BOT_TOKEN,
@@ -21,6 +22,7 @@ export function getBindings<E extends AppEnv>({
         return {
             AI,
             LANGUAGES,
+            API_KEY: raw.DEV_API_KEY,
             APPLICATION_ID: raw.DEV_APPLICATION_ID,
             PUBLIC_KEY: raw.DEV_PUBLIC_KEY,
             BOT_TOKEN: raw.DEV_BOT_TOKEN,

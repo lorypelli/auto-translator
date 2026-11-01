@@ -2,7 +2,7 @@ import { ApplicationCommandOptionType } from 'discord-api-types/v10';
 import {
     getBooleanOption,
     getStringOption,
-    parseMessageId,
+    parseMessageReference,
 } from '../../../discord/index.js';
 import type { Subcommand } from '../../../types/index.js';
 import { MAX_LANGUAGE_LENGTH } from '../../shared/index.js';
@@ -38,13 +38,13 @@ export const TRANSLATE_MESSAGE_SUBCOMMAND: Subcommand = {
     },
     run(interaction, runtime) {
         const text = getStringOption(interaction, 'message') || '';
-        const messageId = parseMessageId(text);
+        const reference = parseMessageReference(text);
         const options = {
             language: getStringOption(interaction, 'language'),
             ephemeral: getBooleanOption(interaction, 'ephemeral') ?? true,
         };
-        if (messageId) {
-            return translateFromId(interaction, runtime, messageId, options);
+        if (reference) {
+            return translateFromId(interaction, runtime, reference, options);
         }
         return translateFromText(interaction, runtime, text, options);
     },

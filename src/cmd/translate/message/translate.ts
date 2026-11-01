@@ -14,16 +14,19 @@ import {
 import {
     error,
     getMessage,
+    getMessageText,
     getReadableChannelId,
     getUser,
     getUserId,
+    isInChannel,
+    type MessageReference,
     sendEmbeds,
     toEmbed,
 } from '../../../discord/index.js';
 import type { Bindings, Runtime } from '../../../types/index.js';
 import { orNull } from '../../../utils/index.js';
 import { resolveLanguage } from '../../shared/index.js';
-import { NO_TEXT_ERROR } from './constants.js';
+import { NO_TEXT_ERROR, WRONG_CHANNEL_ERROR } from './constants.js';
 
 type TranslateInteraction =
     | APIApplicationCommandInteraction
@@ -94,10 +97,11 @@ async function sendTranslationFromId(
     options: TranslateMessageOptions,
 ) {
     const message = await getMessage(env, channelId, messageId);
-    if (!message.content) {
+    const text = getMessageText(message);
+    if (!text) {
         throw new Error(NO_TEXT_ERROR);
     }
-    await sendTranslation(interaction, env, message.content, options, message);
+    await sendTranslation(interaction, env, text, options, message);
 }
 
 export function translateFromText(
@@ -112,7 +116,7 @@ export function translateFromText(
 export function translateFromId(
     interaction: TranslateInteraction,
     { env, defer }: Runtime,
-    messageId: string,
+    reference: MessageReference,
     options: TranslateMessageOptions,
 ) {
     const channelId = getReadableChannelId(interaction);
@@ -121,7 +125,16 @@ export function translateFromId(
             'Message IDs and links only work in servers and DMs the bot is in.',
         );
     }
+    if (!isInChannel(reference, channelId)) {
+        return error(WRONG_CHANNEL_ERROR);
+    }
     return defer(
-        sendTranslationFromId(interaction, env, channelId, messageId, options),
+        sendTranslationFromId(
+            interaction,
+            env,
+            channelId,
+            reference.messageId,
+            options,
+        ),
     );
 }

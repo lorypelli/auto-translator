@@ -1,12 +1,16 @@
 import type { Bindings } from '../types/index.js';
 import { isStringArray } from '../utils/index.js';
 import { ask } from './client.js';
-import { INVALID_LANGUAGE_ERROR, INVALID_RESPONSE_ERROR } from './errors.js';
+import {
+    INVALID_LANGUAGE_ERROR,
+    INVALID_RESPONSE_ERROR,
+    isInvalidResponse,
+} from './errors.js';
 import { TRANSLATE_PROMPT } from './prompts.js';
 
 const CHUNK_SIZE = 10;
 
-async function translateChunk(
+async function requestTranslations(
     env: Bindings,
     messages: string[],
     language: string,
@@ -22,6 +26,26 @@ async function translateChunk(
         throw new Error(INVALID_RESPONSE_ERROR);
     }
     return translations;
+}
+
+async function translateChunk(
+    env: Bindings,
+    messages: string[],
+    language: string,
+): Promise<string[]> {
+    try {
+        return await requestTranslations(env, messages, language);
+    } catch (err) {
+        if (!isInvalidResponse(err) || messages.length < 2) {
+            throw err;
+        }
+        const middle = Math.ceil(messages.length / 2);
+        const halves = await Promise.all([
+            translateChunk(env, messages.slice(0, middle), language),
+            translateChunk(env, messages.slice(middle), language),
+        ]);
+        return halves.flat();
+    }
 }
 
 export async function translateMessages(

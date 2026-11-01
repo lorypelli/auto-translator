@@ -14,6 +14,14 @@ export const TRANSLATE_MESSAGE_MODAL: Modal = {
         if (text) {
             return translateFromText(interaction, runtime, text, options);
         }
-        return translateFromId(interaction, runtime, messageId, options);
+        return translateFromId(
+            interaction,
+            runtime,
+            {
+                channelId: null,
+                messageId,
+            },
+            options,
+        );
     },
 };

@@ -5,6 +5,7 @@ import {
 import {
     ANYWHERE,
     error,
+    getMessageText,
     getReadableChannelId,
     showModal,
     toCustomId,
@@ -36,11 +37,12 @@ export const TRANSLATE_MESSAGE_CONTEXT_MENU: Command = {
         }
         const message =
             interaction.data.resolved.messages[interaction.data.target_id];
-        if (!message?.content) {
+        const text = message && getMessageText(message);
+        if (!text) {
             return error(NO_TEXT_ERROR);
         }
         const customId = toCustomId(MODAL_ID, interaction.data.target_id);
-        const inputs = getModalInputs(interaction, message.content);
+        const inputs = getModalInputs(interaction, text);
         return showModal(customId, 'Translate Message', inputs);
     },
 };

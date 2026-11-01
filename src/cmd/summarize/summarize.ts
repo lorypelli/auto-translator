@@ -16,6 +16,7 @@ import {
     getReadableChannelId,
     getUser,
     getUserId,
+    MAX_MESSAGES,
     parseMessageRange,
     sendEmbeds,
     toEmbed,
@@ -34,8 +35,12 @@ type SummarizeOptions = {
     to: string | null;
 };
 
-function getFooterText(count: number) {
-    return `Summarized ${count} ${count == 1 ? 'message' : 'messages'}`;
+function getFooterText(count: number, truncated: boolean) {
+    const text = `Summarized ${count} ${count == 1 ? 'message' : 'messages'}`;
+    if (truncated) {
+        return `${text}, the range was cut at ${MAX_MESSAGES} messages`;
+    }
+    return text;
 }
 
 async function selectMessages(
@@ -52,6 +57,7 @@ async function selectMessages(
 async function summarizeToEmbed(
     env: Bindings,
     messages: APIMessage[],
+    truncated: boolean,
     language: string,
     user: APIUser | null,
     options: SummarizeOptions,
@@ -64,7 +70,7 @@ async function summarizeToEmbed(
     return {
         ...toEmbed(summary, user),
         footer: {
-            text: getFooterText(conversation.length),
+            text: getFooterText(conversation.length, truncated),
         },
     };
 }
@@ -76,7 +82,7 @@ async function sendSummary(
     options: SummarizeOptions,
 ) {
     const { ephemeral, from, to } = options;
-    const messages = await getChatMessages(env, channelId, {
+    const { messages, truncated } = await getChatMessages(env, channelId, {
         from,
         to,
     });
@@ -93,6 +99,7 @@ async function sendSummary(
         summarizeToEmbed(
             env,
             messages,
+            truncated,
             language,
             getUser(interaction),
             options,
@@ -110,7 +117,7 @@ export function summarize(
     if (!channelId) {
         return error(UNREADABLE_CHANNEL_ERROR);
     }
-    const range = parseMessageRange(options.from, options.to);
+    const range = parseMessageRange(options.from, options.to, channelId);
     if (!range) {
         return error(INVALID_RANGE_ERROR);
     }
