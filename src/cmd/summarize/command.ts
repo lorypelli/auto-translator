@@ -3,9 +3,9 @@ import {
     ApplicationCommandType,
 } from 'discord-api-types/v10';
 import {
+    ANYWHERE,
     getBooleanOption,
     getStringOption,
-    WITH_BOT,
 } from '../../discord/index.js';
 import type { Command } from '../../types/index.js';
 import { autocompleteLanguage, MAX_LANGUAGE_LENGTH } from '../shared/index.js';
@@ -19,7 +19,7 @@ import { summarize } from './summarize.js';
 
 export const SUMMARIZE_COMMAND: Command = {
     data: {
-        ...WITH_BOT,
+        ...ANYWHERE,
         type: ApplicationCommandType.ChatInput,
         name: 'summarize',
         description: 'Summarize the latest conversation or a range of messages',

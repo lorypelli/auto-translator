@@ -22,11 +22,6 @@ export const ANYWHERE: CommandContext = {
     ],
 };
 
-export const WITH_BOT: CommandContext = {
-    integration_types: [ApplicationIntegrationType.GuildInstall],
-    contexts: [InteractionContextType.Guild, InteractionContextType.BotDM],
-};
-
 export function getReadableChannelId({
     authorizing_integration_owners: owners,
     channel,
